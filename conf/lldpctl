@@ -1,0 +1,1 @@
+diamond ALL=(ALL:ALL) NOPASSWD: /usr/sbin/lldpctl -f keyvalue
