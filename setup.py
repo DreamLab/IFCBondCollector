@@ -13,7 +13,7 @@ setup(
     name='diamond-ifcbondcollector',
     version='2.0.0',
     author='Onet - HW Platforms KRK',
-    author_email='hw-priv@dreamlab.pl',
+    author_email='hw-support@dreamlab.pl',
     description='Diamond collector for bonding status',
     py_modules=['src/ifcbondcollector'],
     data_files=[

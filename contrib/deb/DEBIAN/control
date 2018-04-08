@@ -2,5 +2,5 @@ Package: diamond-ifcbondcollector
 Version: 2.0.0
 Architecture: amd64
 Depends: lldpd (>=0.5.5-1), diamond (>=4.0.0)
-Maintainer: Team HW Platforms (hw-priv@dreamlab.pl)
+Maintainer: Team HW Platforms (hw-support@dreamlab.pl)
 Description: Bond status collector for Diamond
