@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ "$1" == "remove" ]
+then
+	service diamond stop
+	if [ -s /usr/share/diamond/collectors/ifcbondcollector/ifcbondcollector.pyc ]
+	then
+		rm /usr/share/diamond/collectors/ifcbondcollector/ifcbondcollector.pyc
+	fi
+fi

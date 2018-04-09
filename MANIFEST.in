@@ -1,0 +1,5 @@
+include *.txt
+include *.md
+include conf/IFCBondCollector.conf
+include conf/lldpctl
+include src/ifcbondcollector.py

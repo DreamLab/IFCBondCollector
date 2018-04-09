@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if [ "$1" == "configure" ]
+then
+	chmod 0440 /etc/sudoers.d/lldpctl
+	service diamond restart
+fi

@@ -1,0 +1,14 @@
+lldp.eth1.via=LLDP
+lldp.eth1.rid=1
+lldp.eth1.age=22 day, 19:27:04
+lldp.eth1.chassis.mac=yy:yy:yy:yy:yy:yy
+lldp.eth1.chassis.name=sw2.test.switch
+lldp.eth1.chassis.descr=Cisco Nexus Operating System (NX-OS) Software
+TAC support: http://www.cisco.com/tac
+Copyright (c) 2002-2014, Cisco Systems, Inc. All rights reserved.
+lldp.eth1.chassis.mgmt-ip=11.111.111.11
+lldp.eth1.chassis.Bridge.enabled=on
+lldp.eth1.port.local=Eth122/1/2
+lldp.eth1.port.descr=Ethernet122/1/2
+lldp.eth1.vlan.vlan-id=101
+lldp.eth1.vlan.pvid=yes
