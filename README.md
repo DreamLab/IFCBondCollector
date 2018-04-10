@@ -41,5 +41,5 @@ eth1_on_sw2 = eth1, chassis_name, test_name_switch2
 rules = eth0_on_sw1, eth1_on_sw2
 ```
 
-##LICENSE
+## License
 [Apache License 2.0](LICENSE)
