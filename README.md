@@ -1,4 +1,4 @@
-# ifcbond-collector
+# IFCBondCollector
 
 ## About:
 Monitoring for bonding network interfaces based on diamond collector
@@ -29,8 +29,8 @@ enabled = True
 ifc_name = "bond0"
 ```
 
-Extended configuration with rules (We can check if the designated network interfaces are connected to the correct network device).
-In this example we check if eth0 is connected to switch with name test_name_switch1, and eth1 to test_name_switch2.
+Extended configuration with rules (We can check if the designated network interfaces are connected to the correct network device - Interface names must be the same as those available from lldpctl ).
+In this example we check if eth0 is connected to switch with name test_name_switch1, and eth1 to test_name_switch2, but chassis_name is only variable available from the lldpctl - we can use there any other variable to match it with each other like chassis_mac, port_descr etc.
 ```
 enabled = True
 ifc_name = "bond0"
@@ -41,3 +41,5 @@ eth1_on_sw2 = eth1, chassis_name, test_name_switch2
 rules = eth0_on_sw1, eth1_on_sw2
 ```
 
+## License
+[Apache License 2.0](LICENSE)
