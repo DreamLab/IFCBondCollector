@@ -33,7 +33,9 @@ or with deb
 
 Requirements
 ------------
+
 Collector requires following packages to be installed:
+
 - Python2 (>=2.7)
 - diamond
 - lldpd
