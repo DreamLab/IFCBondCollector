@@ -1,5 +1,6 @@
 graft src
 graft tests
+graft conf
 
 include CHANGELOG.rst
 include README.rst
