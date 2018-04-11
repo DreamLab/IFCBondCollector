@@ -11,7 +11,7 @@ def read(name):
 
 setup(
     name='diamond-ifcbondcollector',
-    version='2.0.0',
+    version='2.0.1',
     author='Onet - HW Platforms KRK',
     author_email='hw-support@dreamlab.pl',
     description='Diamond collector for bonding status',
