@@ -1,5 +1,13 @@
-include *.txt
-include *.md
-include conf/IFCBondCollector.conf
-include conf/lldpctl
-include src/ifcbondcollector.py
+graft src
+graft tests
+
+include CHANGELOG.rst
+include README.rst
+include LICENSE
+include requirements.txt
+include test-requirements.txt
+
+include tox.ini .travis.yml
+
+global-exclude *.py[cod] __pycache__ *.so *.dylib
+exclude .pytest_cache

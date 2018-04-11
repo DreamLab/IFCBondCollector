@@ -24,7 +24,7 @@ setup(
     install_requires=read('requirements.txt').split('\n'),
     include_package_data=True,
     keywords=[
-                'diamond', 'collector', 'bonding', 'network', 'interfaces'
+        'diamond', 'collector', 'bonding', 'network', 'interfaces'
     ],
     classifiers=[
         'Programming Language :: Python',
