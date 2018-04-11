@@ -40,7 +40,7 @@ Collector requires following packages to be installed:
 
 
 Example configuration 
----------------------
+=====================
 
 Base
 ----
