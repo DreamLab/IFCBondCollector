@@ -146,7 +146,7 @@ class IFCBondCollector(Collector):
 
     def _publish(self, name, value):
         self.publish(name, value)
-        logging.critical('%s %s', name, value)
+        logging.debug('%s %s', name, value)
 
     def reporting_data(self):
         """ reporting collected data to maas """
