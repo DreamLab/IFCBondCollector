@@ -57,6 +57,8 @@ Extended
 --------
 
 Extended configuration with rules collector will check if the designated network interfaces are connected to the correct network device (interface names must be the same as those available from lldpctl).
+
+
 In this example we check if eth0 is connected to switch with name test_name_switch1, and eth1 to test_name_switch2. Below configuration matches switch by chassis_name - a field fromm `llpdctl` output, you can specify to test against different field eg. chassis_mac, port_descr etc.
 
 :: 
