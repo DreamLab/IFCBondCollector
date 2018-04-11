@@ -9,7 +9,7 @@ IFCBondCollector
 
 About
 =====
-Monitoring for bonding network interfaces based on diamond collector
+Monitoring for bonding network interfaces based on diamond collector and llpd.
 
 How to build/install
 ====================
@@ -17,6 +17,7 @@ How to build/install
 Simply install package via `pip`:
 
 ::
+
     pip install diamond-ifcbondcollector
 
     # or
@@ -25,6 +26,7 @@ Simply install package via `pip`:
 or with deb
 
 ::
+
     make deb
     dpkg -i ./bin/diamond-ifcbondcollector_2.0.0_amd64.deb
 
@@ -46,6 +48,7 @@ Base
 Default configuration
 
 ::
+
     enabled = True
     ifc_name = "bond0"
 
