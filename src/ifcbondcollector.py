@@ -1,10 +1,14 @@
 import logging
 import datetime
-import diamond.collector
 import os
 import re
+from diamond.collector import Collector
 
-class IFCBondCollector(diamond.collector.Collector):
+
+class IFCBondCollector(Collector):
+
+    REGEX_AGE = re.compile('(\d+)\s[^ ]+\s(\d+):(\d+):(\d+)')
+
     def get_default_config_help(self):
         config_help = super(IFCBondCollector, self).get_default_config_help()
         config_help.update({
@@ -30,15 +34,15 @@ class IFCBondCollector(diamond.collector.Collector):
         ifc_list = {}
         master_status = {}
         pos_newln = stat_list.index('')
-        i = 0
+
         while len(stat_list) > 0:
 
-            parsed_settings = { v.split(':')[0]: ''.join(v.split(':')[1:]).strip(' ') for v in stat_list[0:(pos_newln)] }
-            stat_list = stat_list[pos_newln+1:]
+            parsed_settings = {v.split(':')[0]: ''.join(v.split(':')[1:]).strip() for v in stat_list[0:(pos_newln)]}
+            stat_list = stat_list[pos_newln + 1:]
             if len(parsed_settings) == 0:
                 continue
             elif parsed_settings.get('Slave Interface'):
-                parsed_settings.setdefault('lldp_stats',{})
+                parsed_settings.setdefault('lldp_stats', {})
                 parsed_settings['active'] = False
                 ifc_list[parsed_settings.get('Slave Interface')] = parsed_settings
             elif parsed_settings.get('Primary Slave'):
@@ -61,7 +65,7 @@ class IFCBondCollector(diamond.collector.Collector):
         stat_list = {}
         tmp_list = {}
 
-        self.publish_data = { "ifc" : {} }
+        self.publish_data = {"ifc": {}}
 
         for link_stat in link_stat_list:
             if not link_stat.startswith('lldp'):
@@ -69,30 +73,28 @@ class IFCBondCollector(diamond.collector.Collector):
 
             key, val = link_stat.split('=')
             key = key.split('.', 2)
-            key[2] = key[2].replace('.','_')
+            key[2] = key[2].replace('.', '_')
 
             ifc_name = key[1]
             lldp_stat = key[-1]
 
             if ifc_name in stat_list.keys():
                 if ifc_name not in tmp_list.keys():
-                   tmp_list[ifc_name] = {}
+                    tmp_list[ifc_name] = {}
 
                 if lldp_stat in stat_list[ifc_name]:
                     tmp_list[ifc_name][lldp_stat] = val
 
-                    if lldp_stat  == 'age' and lldp_stat in stat_list[ifc_name]:
-                        match1 = re.search('\d+\s(.*)\s\d+:\d+:\d+', val)
-                        tmp_split_key = match1.group(1)
-                        tmp_days, tmp_ts = val.split(tmp_split_key)
-                        tmp_age_ts_sp = tmp_ts.split(':')
-                        tmp_delta = datetime.timedelta(days=int(tmp_days), hours=int(tmp_age_ts_sp[0]), minutes=int(tmp_age_ts_sp[1]))
+                    if lldp_stat == 'age' and lldp_stat in stat_list[ifc_name]:
+                        days, hours, minutes, seconds = self.REGEX_AGE.match(val).groups()
+                        tmp_delta = datetime.timedelta(
+                            days=int(days), hours=int(hours), minutes=int(minutes), seconds=int(seconds)
+                        )
 
-                        match2 = re.search('\d+\s(.*)\s\d+:\d+:\d+', stat_list[ifc_name][lldp_stat])
-                        stat_split_key = match2.group(1)
-                        stat_days, stat_ts = stat_list[ifc_name][lldp_stat].split(stat_split_key)
-                        stat_age_ts_sp = stat_ts.split(':')
-                        stat_delta = datetime.timedelta(days=int(stat_days), hours=int(stat_age_ts_sp[0]), minutes=int(stat_age_ts_sp[1]))
+                        days, hours, minutes, seconds = self.REGEX_AGE.match(stat_list[ifc_name][lldp_stat]).groups()
+                        stat_delta = datetime.timedelta(
+                            days=int(days), hours=int(hours), minutes=int(minutes), seconds=int(seconds)
+                        )
 
                         if int(tmp_delta.total_seconds()) < int(stat_delta.total_seconds()):
                             stat_list[ifc_name] = tmp_list[ifc_name]
@@ -101,8 +103,7 @@ class IFCBondCollector(diamond.collector.Collector):
                 else:
                     stat_list[ifc_name][lldp_stat] = val
             else:
-                stat_list[ifc_name] = { lldp_stat : val }
-
+                stat_list[ifc_name] = {lldp_stat: val}
 
         # check for only available interfaces
         for ifc_name in ifc_list.keys():
@@ -110,11 +111,11 @@ class IFCBondCollector(diamond.collector.Collector):
 
         # collecting data to publish
         for ifc_name in ifc_list.keys():
-            self.publish_data["ifc"].setdefault(ifc_name,{})
-            self.publish_data["ifc"][ifc_name]['Status'] = (True if ifc_list.get(ifc_name).get('MII Status') == 'up' else False)  
+            self.publish_data["ifc"].setdefault(ifc_name, {})
+            self.publish_data["ifc"][ifc_name]['Status'] = ifc_list.get(ifc_name).get('MII Status') == 'up'
             self.publish_data["ifc"][ifc_name]['Link Failure Count'] = ifc_list.get(ifc_name).get('Link Failure Count')
-            self.publish_data["ifc"][ifc_name]['Active'] =  ifc_list.get(ifc_name).get('active')
-            self.publish_data["ifc"][ifc_name]['lldp_stats_unavailable'] = (True if len(ifc_list.get(ifc_name).get('lldp_stats')) <1 else False)
+            self.publish_data["ifc"][ifc_name]['Active'] = ifc_list.get(ifc_name).get('active')
+            self.publish_data["ifc"][ifc_name]['lldp_stats_unavailable'] = len(ifc_list.get(ifc_name).get('lldp_stats')) < 1
 
         return (ifc_list)
 
@@ -122,48 +123,59 @@ class IFCBondCollector(diamond.collector.Collector):
         """ compare parameters from ifcbondingcollector.conf with parsed data in lldpctl """
 
         if rules:
-            self.publish_data.setdefault('rules',{})
+            self.publish_data.setdefault('rules', {})
             for rule_name in rules:
                 ifc_name = self.config.get(rule_name)[0]
-                check_parametr = self.config.get(rule_name)[1]
-                value_parametr = self.config.get(rule_name)[2]
+                chk_param = self.config.get(rule_name)[1]
+                val_param = self.config.get(rule_name)[2]
 
-                check_rule = ( True if ifc_name not in ifc_list.keys() or value_parametr != ifc_list.get(ifc_name,{}).get('lldp_stats',{}).get(check_parametr,{}) else False )
-                self.publish_data['rules'][rule_name] = check_rule
-
+                val_param_match = val_param == ifc_list.get(ifc_name, {}).get('lldp_stats', {}).get(chk_param, {})
+                chk_rule = ifc_name not in ifc_list.keys() or not val_param_match
+                self.publish_data['rules'][rule_name] = chk_rule
 
     def check_bonding_match(self, ifc_list):
         """ validation connection to switches """
 
         dev_list = []
-        self.publish_data.setdefault('mismatch_bond',{})
+        self.publish_data.setdefault('mismatch_bond', {})
 
         for ifc_name in ifc_list.keys():
-            dev_list.append(ifc_list.get(ifc_name,{}).get('lldp_stats',{}).get('chassis_name',{}))
+            dev_list.append(ifc_list.get(ifc_name, {}).get('lldp_stats', {}).get('chassis_name', {}))
 
-        self.publish_data['mismatch_bond'] = ( dev_list[1:] == dev_list[:-1] )
+        self.publish_data['mismatch_bond'] = dev_list[1:] == dev_list[:-1]
 
+    def _publish(self, name, value):
+        self.publish(name, value)
+        logging.debug('Published metric - name: %s value: %s', name, value)
 
     def reporting_data(self):
         """ reporting collected data to maas """
 
-        for publish_key in self.publish_data.get('ifc',{}):
-            self.publish('{}.status'.format(publish_key), self.publish_data.get('ifc').get(publish_key).get('Status'))
-            self.publish('{}.link_failure_count'.format(publish_key), self.publish_data.get('ifc').get(publish_key).get('Link Failure Count'))
-            self.publish('{}.active'.format(publish_key), self.publish_data.get('ifc').get(publish_key).get('Active'))
-            self.publish('{}.lldp_stats_unavailable'.format(publish_key), self.publish_data.get('ifc').get(publish_key).get('lldp_stats_unavailable'))
+        for publish_key in self.publish_data.get('ifc', {}):
+            self._publish(
+                '{}.status'.format(publish_key),
+                self.publish_data.get('ifc').get(publish_key).get('Status')
+            )
+            self._publish(
+                '{}.link_failure_count'.format(publish_key),
+                self.publish_data.get('ifc').get(publish_key).get('Link Failure Count')
+            )
+            self._publish(
+                '{}.active'.format(publish_key),
+                self.publish_data.get('ifc').get(publish_key).get('Active')
+            )
+            self._publish(
+                '{}.lldp_stats_unavailable'.format(publish_key),
+                self.publish_data.get('ifc').get(publish_key).get('lldp_stats_unavailable')
+            )
 
-            logging.info('{}.status {} '.format((publish_key), (self.publish_data.get('ifc').get(publish_key).get('Status'))))
-            logging.info('{}.link_failure_count {} '.format((publish_key), (self.publish_data.get('ifc').get(publish_key).get('Link Failure Count'))))
-            logging.info('{}.active {}'.format((publish_key), (self.publish_data.get('ifc').get(publish_key).get('Active'))))
-            logging.info('{}.lldp_stats_unavailable {}'.format( (publish_key), (self.publish_data.get('ifc').get(publish_key).get('lldp_stats_unavailable'))))
+        for publish_key in self.publish_data.get('rules', {}):
+            self._publish(
+                'mismatch.{}'.format(publish_key),
+                self.publish_data.get('rules').get(publish_key)
+            )
 
-        for publish_key in self.publish_data.get('rules',{}):
-            self.publish('mismatch.{}'.format(publish_key), self.publish_data.get('rules').get(publish_key))
-            logging.info('{} {}'.format((publish_key),(self.publish_data.get('rules').get(publish_key))))
-
-        self.publish('mismatch.bond',self.publish_data.get('mismatch_bond'))
-        logging.info('mismatch.bond {}'.format(self.publish_data.get('mismatch_bond')))
+        self._publish('mismatch.bond', self.publish_data.get('mismatch_bond'))
 
     def get_bond_dev(self):
         """ get bonding information from /proc/net/bonding/bond0 stats """
@@ -182,9 +194,9 @@ class IFCBondCollector(diamond.collector.Collector):
 
         self.publish_data = {}
         master_stats, slaves_stats = self.parse_bond_status(bstat)
-        slaves  = self.get_link_stat(slaves_stats)
+        slaves = self.get_link_stat(slaves_stats)
 
-        rules =  self.config.get('rules')
+        rules = self.config.get('rules')
         self.check_given_rules(slaves, rules)
         self.check_bonding_match(slaves)
 
